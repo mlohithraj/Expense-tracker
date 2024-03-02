@@ -7,7 +7,8 @@ const Signup = () => {
   const passwordInputRef = useRef();
   const confirmPasswordInputRef = useRef();
 
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [confirmEnteredPassword, setConfirmEnteredPassword] = useState('');
 
   const switchHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -18,15 +19,21 @@ const Signup = () => {
 
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
-    const confirmEnteredPassword = confirmPasswordInputRef.current.value;
 
-    if (enteredPassword !== confirmEnteredPassword) {
-      alert('Password does not match. pls re-enter password...');
-      return;
+    if (!isLogin) {
+      const confirmEnteredPasswordValue = confirmPasswordInputRef.current.value;
+      setConfirmEnteredPassword(confirmEnteredPasswordValue);
+
+      if (enteredPassword !== confirmEnteredPasswordValue) {
+        alert('Password does not match. Please re-enter password...');
+        return;
+      }
     }
 
     let url;
     if (isLogin) {
+      url =
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAyA-q0e_kzrsBi07QnurND_HsTyTaiZBw';
     } else {
       url =
         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAyA-q0e_kzrsBi07QnurND_HsTyTaiZBw';
@@ -49,22 +56,20 @@ const Signup = () => {
           return res.json().then((data) => {
             let errorMessage = 'Authentication Failed';
 
-            throw new Error(data.error.message);
+            throw new Error(errorMessage);
           });
         }
       })
-      .then((data) => {
-        alert('Authentication successful', data);
-      })
+      .then((data) => {})
       .catch((error) => {
-        console.error('Authentication failed:', error.message);
+        alert(error.errorMessage);
       });
   };
 
   return (
     <div>
       <div className={classes.container}>
-        <h2>Sign Up</h2>
+        <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
         <form className={classes.form} onSubmit={submitHandler}>
           <div>
             <label>Email Id</label>
@@ -86,24 +91,30 @@ const Signup = () => {
               ref={passwordInputRef}
             />
           </div>
-          <div>
-            <label>Confirm Password</label>
-            <br />
-            <input
-              type="password"
-              placeholder="Re-Enter Password"
-              className={classes.input}
-              ref={confirmPasswordInputRef}
-            />
-          </div>
+          {!isLogin && (
+            <div>
+              <label>Confirm Password</label>
+              <br />
+              <input
+                type="password"
+                placeholder="Re-Enter Password"
+                className={classes.input}
+                ref={confirmPasswordInputRef}
+              />
+            </div>
+          )}
           <button type="submit" className={classes.submit}>
-            Sign Up
+            {isLogin ? <Link to='/Login'>'Login'</Link> : 'Sign Up'}
           </button>
         </form>
       </div>
+
       <div className={classes.account}>
         <p>
-          Have an Account? <button onClick={switchHandler}>Login</button>
+          {isLogin ? "Don't have an Account?" : 'Have an Account?'}{' '}
+          <button onClick={switchHandler}>
+            {isLogin ? 'Sign Up' : 'Login'}
+          </button>
         </p>
       </div>
     </div>
